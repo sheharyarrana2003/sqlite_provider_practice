@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
+import 'package:sqlite_practice_flutter/modules/theme_provider.dart';
 
 class ProfileScreen extends StatefulWidget {
   const ProfileScreen({super.key});
@@ -11,8 +13,9 @@ class _ProfileScreenState extends State<ProfileScreen> {
   @override
   Widget build(BuildContext context) {
     double screenWidth = MediaQuery.of(context).size.width;
+    final themeProvider=Provider.of<ThemeProvider>(context);
     return Scaffold(
-      backgroundColor: Colors.blue.shade50,
+      backgroundColor: themeProvider.getBackgroundColor(),
       appBar: AppBar(
         backgroundColor: Colors.blue.shade600,
         iconTheme: const IconThemeData(color: Colors.white),
@@ -71,7 +74,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
               Container(
                 padding: const EdgeInsets.all(20),
                 decoration: BoxDecoration(
-                  color: Colors.white,
+                  color: themeProvider.getSurfaceColor(),
                   borderRadius: BorderRadius.circular(15),
                   boxShadow: [
                     BoxShadow(
@@ -84,9 +87,9 @@ class _ProfileScreenState extends State<ProfileScreen> {
                 ),
                 child: Column(
                   children: [
-                    _buildProfileField("Name", "User Name", Icons.person_outline),
+                    _buildProfileField("Name", "User Name", Icons.person_outline,themeProvider.getTextColor()),
                     const Divider(thickness: 1, color: Colors.grey),
-                    _buildProfileField("Email", "User Email", Icons.email_outlined),
+                    _buildProfileField("Email", "User Email", Icons.email_outlined,themeProvider.getTextColor()),
                   ],
                 ),
               ),
@@ -97,7 +100,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                 child: ElevatedButton(
                   onPressed: () {},
                   style: ElevatedButton.styleFrom(
-                    backgroundColor: Colors.blue.shade600,
+                    backgroundColor: themeProvider.getPrimaryColor(),
                     padding: const EdgeInsets.symmetric(vertical: 14),
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(12),
@@ -118,7 +121,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
     );
   }
 
-  Widget _buildProfileField(String label, String value, IconData icon) {
+  Widget _buildProfileField(String label, String value, IconData icon,Color color) {
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 12),
       child: Row(
@@ -128,12 +131,12 @@ class _ProfileScreenState extends State<ProfileScreen> {
           Expanded(
             child: Text(
               label,
-              style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
+              style:  TextStyle(fontSize: 16, fontWeight: FontWeight.w600,color: color),
             ),
           ),
           Text(
             value,
-            style: const TextStyle(fontSize: 16, color: Colors.black87),
+            style:  TextStyle(fontSize: 16,color: color),
           ),
           const SizedBox(width: 8),
           GestureDetector(

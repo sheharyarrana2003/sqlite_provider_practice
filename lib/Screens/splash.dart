@@ -51,8 +51,7 @@ class _SplashState extends State<Splash> with SingleTickerProviderStateMixin {
     double screenWidth = MediaQuery.of(context).size.width;
     double screenHeight = MediaQuery.of(context).size.height;
 
-    // Adaptive sizes for all screen types
-    double iconSize = (screenWidth * 0.15).clamp(50.0, 100.0); // Limits the size
+    double iconSize = (screenWidth * 0.15).clamp(50.0, 100.0);
     double titleSize = (screenWidth * 0.08).clamp(24.0, 50.0);
     double subtitleSize = (screenWidth * 0.04).clamp(12.0, 22.0);
     double spacing = (screenHeight * 0.02).clamp(10.0, 30.0);
@@ -62,7 +61,7 @@ class _SplashState extends State<Splash> with SingleTickerProviderStateMixin {
         width: double.infinity,
         decoration: const BoxDecoration(
           gradient: LinearGradient(
-            colors: [Color(0xFF3B82F6), Color(0xFF60A5FA)], // Blue gradient
+            colors: [Color(0xFF3B82F6), Color(0xFF60A5FA)],
             begin: Alignment.topCenter,
             end: Alignment.bottomCenter,
           ),
@@ -73,7 +72,7 @@ class _SplashState extends State<Splash> with SingleTickerProviderStateMixin {
             child: ScaleTransition(
               scale: _scaleAnimation,
               child: Column(
-                mainAxisSize: MainAxisSize.min, // Prevent overflow on web
+                mainAxisSize: MainAxisSize.min,
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
                   Container(

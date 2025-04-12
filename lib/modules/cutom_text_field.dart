@@ -7,6 +7,7 @@ class CustomTextField extends StatefulWidget {
   final bool isPass;
   final FormFieldValidator<String>? validator;
   final int? maxLines;
+  final Color color;
 
   const CustomTextField(
 
@@ -16,6 +17,7 @@ class CustomTextField extends StatefulWidget {
     required this.hint,
     required this.controller,
     required this.isPass,
+        required this.color,
     this.validator,
         this.maxLines,
   });
@@ -31,13 +33,15 @@ class _CustomTextFieldState extends State<CustomTextField> {
   Widget build(BuildContext context) {
     return TextFormField(
       controller: widget.controller,
+      keyboardType: TextInputType.name,
       obscureText: widget.isPass ? _isObscured : false,
+      style: TextStyle(color: widget.color),
       decoration: InputDecoration(
         labelText: "Enter ${widget.label}",
         hintText: widget.hint,
         enabledBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(10),
-          borderSide: const BorderSide(color: Colors.black45),
+          borderSide:  BorderSide(color: widget.color),
         ),
         focusedBorder: OutlineInputBorder(
           borderSide: BorderSide(color: Colors.blue.shade500),
