@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
+import 'package:provider/provider.dart';
 import 'package:sqlite_practice_flutter/Screens/home_screen.dart';
 import 'package:sqlite_practice_flutter/modules/db_helper.dart';
+import 'package:sqlite_practice_flutter/modules/db_provider.dart';
 import '../modules/cutom_text_field.dart';
 
 class AddTask extends StatefulWidget {
@@ -50,7 +52,7 @@ class _AddTaskState extends State<AddTask> {
           centerTitle: true,
           backgroundColor: Colors.blue.shade600,
           elevation: 0,
-          iconTheme: IconThemeData(color: Colors.white),
+          iconTheme: IconThemeData(color: Colors.white ),
         ),
         body: Center(
           child: Container(
@@ -142,13 +144,14 @@ class _AddTaskState extends State<AddTask> {
                           onPressed: () async {
                             String currentTime = getCurrentTime();
                             if (_formKey.currentState!.validate()) {
-                              await dbRef!.addNote(
-                                Title: _noteController.text.trim(),
-                                Desc: _desController.text.trim(),
-                                category: _selectedCategory!,
-                                time: currentTime,
-                              );
-                              Navigator.of(context).pop(true);
+                              // await dbRef!.addNote(
+                              //   Title: _noteController.text.trim(),
+                              //   Desc: _desController.text.trim(),
+                              //   category: _selectedCategory!,
+                              //   time: currentTime,
+                              // );
+                              context.read<DBProvider>().addNote(_noteController.text.trim(), _desController.text.trim(), currentTime, _selectedCategory!);
+                              Navigator.pop(context);
                             }
                           },
                           style: ElevatedButton.styleFrom(

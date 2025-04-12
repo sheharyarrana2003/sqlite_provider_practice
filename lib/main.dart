@@ -1,9 +1,12 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 import 'package:sqlite_practice_flutter/Screens/splash.dart';
 import 'package:sqlite_practice_flutter/modules/db_helper.dart';
+import 'package:sqlite_practice_flutter/modules/db_provider.dart';
 
 void main() {
-  runApp(const MyApp());
+  runApp(ChangeNotifierProvider(create: (context)=>DBProvider(dbHelper: DBHelper.getInstance()),
+  child: MyApp(),));
 }
 
 class MyApp extends StatelessWidget {

@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
+import 'package:provider/provider.dart';
 import 'package:sqlite_practice_flutter/Screens/profile_screen.dart';
 import 'package:sqlite_practice_flutter/modules/db_helper.dart';
+import 'package:sqlite_practice_flutter/modules/db_provider.dart';
 import '../modules/cutom_text_field.dart';
 import 'add_task.dart';
 
@@ -13,10 +15,10 @@ class HomeScreen extends StatefulWidget {
 }
 
 class _HomeScreenState extends State<HomeScreen> {
-  List<Map<String, dynamic>> allNotes = [];
-  List<Map<String, dynamic>> specificNotes = [];
-  List<Map<String, dynamic>> filteredNotes = [];
-  DBHelper? dbRef;
+  // List<Map<String, dynamic>> allNotes = [];
+  // List<Map<String, dynamic>> specificNotes = [];
+  // List<Map<String, dynamic>> filteredNotes = [];
+  // DBHelper? dbRef;
   final TextEditingController _noteController = TextEditingController();
   final TextEditingController _desController = TextEditingController();
   final _formKey = GlobalKey<FormState>();
@@ -27,8 +29,8 @@ class _HomeScreenState extends State<HomeScreen> {
   ];
   bool isSearch=false;
   String selectedCategory="All";
-  List<Map<String, dynamic>> notesToShow=[];
-  List<Map<String, dynamic>> findNotes=[];
+  // List<Map<String, dynamic>> notesToShow=[];
+  // List<Map<String, dynamic>> findNotes=[];
 
   Color applyColor(String ct,{bool isSelected=false}){
     if(isSelected){
@@ -63,45 +65,8 @@ class _HomeScreenState extends State<HomeScreen> {
   @override
   void initState() {
     super.initState();
-    dbRef = DBHelper.getInstance();
-    getAllNotes();
+    context.read<DBProvider>().getInitialNotes();
   }
-
-
-  void getAllNotes() async {
-    allNotes = await dbRef!.getAllNotes();
-    setState(() {
-      notesToShow = allNotes;
-      findNotes = allNotes;
-    });
-  }
-
-  void getspecificNotes(String category) async {
-    specificNotes = await dbRef!.getAllNotes(category: category);
-    setState(() {
-      notesToShow = category == "All" ? allNotes : specificNotes;
-      findNotes = notesToShow;
-    });
-  }
-
-
-  void filterNotes(String keyword) {
-    List<Map<String, dynamic>> result = [];
-
-    if (keyword.isEmpty) {
-      result = notesToShow;
-    } else {
-      result = notesToShow.where((note) =>
-          note[DBHelper.NOTE_COLUMN_TITLE]
-              .toLowerCase()
-              .contains(keyword.toLowerCase())).toList();
-    }
-
-    setState(() {
-      findNotes = result;
-    });
-  }
-
 
   String getCurrentTime() {
     return DateFormat('dd/MM/yyyy HH:mm:ss').format(DateTime.now());
@@ -109,6 +74,7 @@ class _HomeScreenState extends State<HomeScreen> {
 
   @override
   Widget build(BuildContext context) {
+    print("Build Context");
     double w = MediaQuery.of(context).size.width;
     double h = MediaQuery.of(context).size.height;
     return GestureDetector(
@@ -140,81 +106,87 @@ class _HomeScreenState extends State<HomeScreen> {
             padding: EdgeInsets.symmetric(horizontal: w * 0.04, vertical: h * 0.015),
           ),
           onPressed: () async {
-            final result = await Navigator.push(context, MaterialPageRoute(builder: (context) => const AddTask()));
-            if (result == true) {
-              getAllNotes();
-            }
+            await Navigator.push(context, MaterialPageRoute(builder: (context) => const AddTask()));
+            context.read<DBProvider>().getInitialNotes();
           },
           icon: const Icon(Icons.add, color: Colors.white),
           label: const Text("Add Task", style: TextStyle(color: Colors.white, fontSize: 16)),
         ),
-        body: LayoutBuilder(
-          builder: (context, constraints) {
-            return allNotes.isNotEmpty ? Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                SizedBox(height: h * 0.02),
-                Padding(
-                  padding: EdgeInsets.symmetric(horizontal: w * 0.03),
-                  child: TextField(
-                    onChanged: (value){
-                      filterNotes(value);
-                    },
-                    decoration: InputDecoration(
-                      labelText: "Search",
-                      suffixIcon: Icon(Icons.search)
-                    ),
-                  ),
-                ),
-                SizedBox(height: h * 0.02),
-                SingleChildScrollView(
-                  scrollDirection: Axis.horizontal,
-                  child: Row(
-                    children: List.generate(categories.length, (index) {
-                      bool isSelected=categories[index]==selectedCategory;
-                      return GestureDetector(
-                        onTap: (){
-                          setState(() {
-                            selectedCategory=categories[index];
-                            getspecificNotes(selectedCategory);
-                          });
+        body: Consumer<DBProvider>(
+          builder: (ctx,provider,__){
+            print("Consumer");
+            return LayoutBuilder(
+              builder: (ctx, constraints) {
+                List<Map<String,dynamic>> allNotes=provider.getAllNotes();
+                return allNotes.isNotEmpty ? Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    SizedBox(height: h * 0.02),
+                    Padding(
+                      padding: EdgeInsets.symmetric(horizontal: w * 0.03),
+                      child: TextField(
+                        onChanged: (value){
+                          print("Search");
+                          provider.filterNotes(value);
                         },
-                        child: Container(
-                          margin: EdgeInsets.symmetric(horizontal: w * 0.01),
-                          padding: EdgeInsets.symmetric(horizontal: w * 0.03, vertical: h * 0.008),
-                          decoration: BoxDecoration(
-                            color: applyColor(categories[index],isSelected: isSelected),
-                            borderRadius: BorderRadius.circular(8),
-                          ),
-                          child: Text(
-                            categories[index],
-                            style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
-                          ),
+                        decoration: InputDecoration(
+                            labelText: "Search",
+                            suffixIcon: Icon(Icons.search)
                         ),
-                      );
-                    }
+                      ),
+                    ),
+                    SizedBox(height: h * 0.02),
+                    SingleChildScrollView(
+                      scrollDirection: Axis.horizontal,
+                      child: Row(
+                        children: List.generate(categories.length, (index) {
+                          bool isSelected=categories[index]==selectedCategory;
+                          return GestureDetector(
+                            onTap: (){
+                              print("Category Build");
+                              selectedCategory=categories[index];
+                              provider.getSpecificNotes(selectedCategory);
+                            },
+                            child: Container(
+                              margin: EdgeInsets.symmetric(horizontal: w * 0.01),
+                              padding: EdgeInsets.symmetric(horizontal: w * 0.03, vertical: h * 0.008),
+                              decoration: BoxDecoration(
+                                color: applyColor(categories[index],isSelected: isSelected),
+                                borderRadius: BorderRadius.circular(8),
+                              ),
+                              child: Text(
+                                categories[index],
+                                style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
+                              ),
+                            ),
+                          );
+                        }
                         ),
-                  ),
-                ),
-                Expanded(
-                  child: Padding(
-                    padding: EdgeInsets.symmetric(horizontal: w * 0.05, vertical: h * 0.02),
-                    child: showNotes(w: w, h: h,selectedCategory: selectedCategory)
-                  )
+                      ),
+                    ),
+                    Expanded(
+                        child: Padding(
+                            padding: EdgeInsets.symmetric(horizontal: w * 0.05, vertical: h * 0.02),
+                            child: showNotes(w: w, h: h,selectedCategory: selectedCategory,ctx: ctx)
+                        )
 
-                ),
-              ],
-            ) : const Center(child: Text("No Notes yet", style: TextStyle(fontSize: 16)));
+                    ),
+                  ],
+                ) : const Center(child: Text("No Notes yet", style: TextStyle(fontSize: 16)));
+              },
+            );
           },
         ),
       ),
     );
   }
-  Widget showNotes({required double w,required double h,required String selectedCategory}){
-    notesToShow = selectedCategory == "All" ? allNotes : specificNotes;
+  Widget showNotes({required double w,required double h,required String selectedCategory,required BuildContext ctx}){
+    //notesToShow = selectedCategory == "All" ? allNotes : specificNotes;
+    List<Map<String,dynamic>> findNotes= ctx.read<DBProvider>().getFindNotes();
     return findNotes.isNotEmpty ? ListView.builder(
       itemCount: findNotes.length,
       itemBuilder: (context, index) {
+        print("Show Notes");
         String category = findNotes[index][DBHelper.NOTE_COLUMN_CATERGORY] ?? "Other";
         return GestureDetector(
           onLongPress: () {
@@ -269,11 +241,8 @@ class _HomeScreenState extends State<HomeScreen> {
                           ),
                           IconButton(
                             onPressed: () async {
-                              bool check = await dbRef!.deleteNote(id: findNotes[index][DBHelper.NOTE_COLUMN_ID]);
-                              if (check) {
-                                getspecificNotes(category);
-                                getAllNotes();
-                              }
+                              print("Delete");
+                              context.read<DBProvider>().deleteNote(findNotes[index][DBHelper.NOTE_COLUMN_ID]);
                             },
                             icon: const Icon(Icons.delete, color: Colors.red),
                           ),
@@ -325,11 +294,9 @@ class _HomeScreenState extends State<HomeScreen> {
           onPressed: () async{
             String currentTime=getCurrentTime();
             if(_formKey.currentState!.validate()){
-              await dbRef!.updateNote(title: _noteController.text.toString().trim(), desc: _desController.text.toString().trim(), time: currentTime, id: id).then((onValue){
-              getAllNotes();
-              getspecificNotes(category);
+              print("Update");
+              context.read<DBProvider>().update(id, category, _noteController.text.toString().trim(), _desController.text.toString().trim(), currentTime);
               Navigator.pop(context);
-              });
             }
           },
           child: const Text("Update",style: TextStyle(color: Colors.white,fontSize: 15),),
