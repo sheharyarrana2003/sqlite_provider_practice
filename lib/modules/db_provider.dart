@@ -94,9 +94,15 @@ class DBProvider extends ChangeNotifier {
   Future<void> _refreshAllNotes() async {
     _isLoading=true;
     notifyListeners();
-    _allNotes = await dbHelper.getAllNotes();
-    _isLoading=false;
-    notifyListeners();
+    try {
+      _allNotes = await dbHelper.getAllNotes();
+      _isLoading = false;
+      notifyListeners();
+    } catch (e) {
+      _isLoading = false;
+      notifyListeners();
+      debugPrint('Error loading notes: $e');
+    }
   }
 
   Future<bool> addNote(String title, String desc, String time, String category) async {
